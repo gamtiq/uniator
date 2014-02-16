@@ -1,0 +1,14 @@
+/*----- style/d.css -----*/
+
+.delta {
+    animation-name: delta;
+}
+
+
+/*----- style/subdir/c.css -----*/
+
+.c {
+    width: 50%;
+}
+
+

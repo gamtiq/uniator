@@ -1,0 +1,29 @@
+<html>
+<head>
+    <title>test: rewrite, include</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+
+    <link rel="stylesheet" type="text/css" href="style/a.css">
+    <style>
+        h3 {
+            color: #ff0;
+        }
+    </style>
+    <link rel="stylesheet" type="text/css" href="style/subdir/c.css">
+    <link rel="stylesheet" type="text/css" href="style/subdir/empty.css">
+    
+</head>
+<body>
+    <h3>This is a header</h3>
+    <link rel="stylesheet" type="text/css" href="style/extra/unknown.css">
+    <p>
+    This is content.
+    </p>
+    <style>
+        p {
+            color: #333;
+        }
+    </style>
+    <link rel="stylesheet" href="style/b.css">
+</body>
+</html>

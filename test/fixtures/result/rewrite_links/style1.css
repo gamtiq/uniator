@@ -1,0 +1,20 @@
+/*----- style/a.css -----*/
+
+.a {
+    position: relative;
+}
+
+
+/*----- style/b.css -----*/
+
+/* This is b.css */
+
+.b {
+    color: #0000ff;
+}
+
+.b__mod {
+    font-size: 20px;
+}
+
+

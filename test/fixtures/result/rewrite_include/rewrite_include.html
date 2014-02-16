@@ -1,0 +1,65 @@
+<html>
+<head>
+    <title>test: rewrite, include</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+
+    <style>
+/*----- style/a.css -----*/
+
+.a {
+    position: relative;
+}
+
+
+/*----- Style tag #1 -----*/
+
+
+        h3 {
+            color: #ff0;
+        }
+    
+
+/*----- style/subdir/c.css -----*/
+
+.c {
+    width: 50%;
+}
+
+
+/*----- Style tag #2 -----*/
+
+
+        p {
+            color: #333;
+        }
+    
+
+/*----- style/b.css -----*/
+
+/* This is b.css */
+
+.b {
+    color: #0000ff;
+}
+
+.b__mod {
+    font-size: 20px;
+}
+
+
+</style>
+    
+    
+    
+    
+</head>
+<body>
+    <h3>This is a header</h3>
+    <link rel="stylesheet" type="text/css" href="style/extra/unknown.css">
+    <p>
+    This is content.
+    </p>
+    
+    
+</body>
+</html>

@@ -1,0 +1,35 @@
+<html>
+<head>
+    <title>test: create new HTML-file and one CSS-file</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+        }
+    </style>
+    <link rel="stylesheet" type="text/css" href="style/subdir/empty.css">
+    <link rel="stylesheet" type="text/css" href="style/a.css">
+    <link rel="stylesheet" type="text/css" href="style/subdir/c.css">
+    <style>
+        h3 {
+            color: #ff0;
+        }
+    </style>
+    
+</head>
+<body>
+    <link rel="stylesheet" type="text/css" href="style/extra/unknown.css">
+    <h3>This is a header</h3>
+    <style>
+        p {
+            color: #333;
+        }
+    </style>
+    <p>
+    This is content.
+    </p>
+    <link rel="stylesheet" href="style/b.css">
+</body>
+</html>

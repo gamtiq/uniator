@@ -1,0 +1,52 @@
+/*----- Style tag #1 -----*/
+
+
+        body {
+            margin: 0;
+            padding: 0;
+        }
+    
+
+/*----- style/a.css -----*/
+
+.a {
+    position: relative;
+}
+
+
+/*----- style/subdir/c.css -----*/
+
+.c {
+    width: 50%;
+}
+
+
+/*----- Style tag #2 -----*/
+
+
+        h3 {
+            color: #ff0;
+        }
+    
+
+/*----- Style tag #3 -----*/
+
+
+        p {
+            color: #333;
+        }
+    
+
+/*----- style/b.css -----*/
+
+/* This is b.css */
+
+.b {
+    color: #0000ff;
+}
+
+.b__mod {
+    font-size: 20px;
+}
+
+
