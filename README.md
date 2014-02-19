@@ -6,6 +6,8 @@ Uniator scans contents of HTML-file, searches for style-tags and link-tags point
 gathers contents of found tags together, removes source tags and creates one or several files or style-tags
 containing collected contents.
 
+There is [Grunt plugin](https://github.com/gamtiq/grunt-uniator).
+
 [![NPM version](https://badge.fury.io/js/uniator.png)](http://badge.fury.io/js/uniator)
 [![Build Status](https://secure.travis-ci.org/gamtiq/uniator.png?branch=master)](http://travis-ci.org/gamtiq/uniator)
 [![Built with Grunt](https://cdn.gruntjs.com/builtwith.png)](http://gruntjs.com/)
@@ -24,7 +26,118 @@ var result = uniator.collectCSS(htmlContent, settings);   // settings are option
 uniator.collectCssInFile(filePath, settings);   // settings are optional; also returns result (see below)
 ```
 
-See `test/uniator.js` for usage examples.
+### Example
+
+#### Source files
+
+##### `index.html`
+```html
+<html>
+<head>
+    <title>Title</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+
+    <link rel="stylesheet" href="style/a.css" type="text/css">
+    <link rel="stylesheet" href="style/b.css">
+    <style>
+        h3 {
+            color: #ff0;
+        }
+    </style>
+    <link rel="stylesheet" type="text/css" href="style/subdir/c.css">
+    <style>
+        div {
+            font-size: 14px;
+        }
+    </style>
+    
+</head>
+<body>
+    <link rel="stylesheet" type="text/css" href="style/extra/unknown.css">
+    <h3>This is header</h3>
+    <link rel="stylesheet" type="text/css" href="style/subdir/empty.css">
+    <div>
+        This is content.
+    </div>
+    <link href="style/d.css" rel="stylesheet">
+</body>
+</html>
+```
+
+##### `style/a.css`
+```css
+.a {
+    position: relative;
+}
+```
+
+##### `style/b.css`
+```css
+/* This is b.css */
+
+.b {
+    color: #0000ff;
+}
+
+.b__mod {
+    font-size: 20px;
+}
+```
+
+##### `style/subdir/c.css`
+```css
+.c {
+    width: 50%;
+}
+```
+
+##### `style/d.css`
+```css
+.delta {
+    animation-name: delta;
+}
+```
+
+#### JavaScript-code
+
+```js
+uniator.collectCssInFile("index.html", {cssFile: "css/combined", minifyCss: true});
+```
+
+#### Output files
+
+##### `index.html`
+```html
+<html>
+<head>
+    <title>Title</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+
+    <link rel="stylesheet" href="css/combined.css" type="text/css">
+    
+    
+    
+    
+    
+</head>
+<body>
+    <link rel="stylesheet" type="text/css" href="style/extra/unknown.css">
+    <h3>This is header</h3>
+    
+    <div>
+        This is content.
+    </div>
+    
+</body>
+</html>
+```
+
+##### `css/combined.css`
+```css
+.a{position:relative}.b{color:#00f}.b__mod{font-size:20px}h3{color:#ff0}.c{width:50%}div{font-size:14px}.delta{animation-name:delta}
+```
+
+See `test/uniator.js` for additional examples.
 
 ## API
 
@@ -92,8 +205,9 @@ Process the given file and gather all styles together into file(s) or style-tag(
 
 It would be much more difficult to implement uniator without usage of the following great libraries:
 
-* [cheerio](https://github.com/MatthewMueller/cheerio) - is used for HTML parsing and transformation
-* [fs-extra](https://github.com/jprichardson/node-fs-extra) - is used for file system operations
+* [cheerio](https://github.com/MatthewMueller/cheerio) is used for HTML parsing and transformation
+* [fs-extra](https://github.com/jprichardson/node-fs-extra) is used for file system operations
+* [clean-css](https://github.com/GoalSmashers/clean-css) is used for CSS minifying.
 
 ## Contributing
 In lieu of a formal styleguide, take care to maintain the existing coding style.

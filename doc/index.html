@@ -78,6 +78,7 @@
 <p>Uniator scans contents of HTML-file, searches for style-tags and link-tags pointing to CSS-files,
 gathers contents of found tags together, removes source tags and creates one or several files or style-tags
 containing collected contents.</p>
+<p>There is <a href="https://github.com/gamtiq/grunt-uniator">Grunt plugin</a>.</p>
 <p><a href="http://badge.fury.io/js/uniator"><img src="https://badge.fury.io/js/uniator.png" alt="NPM version"></a>
 <a href="http://travis-ci.org/gamtiq/uniator"><img src="https://secure.travis-ci.org/gamtiq/uniator.png?branch=master" alt="Build Status"></a>
 <a href="http://gruntjs.com/"><img src="https://cdn.gruntjs.com/builtwith.png" alt="Built with Grunt"></a></p>
@@ -89,7 +90,90 @@ containing collected contents.</p>
 var result = uniator.collectCSS(htmlContent, settings);   // settings are optional
 ...
 uniator.collectCssInFile(filePath, settings);   // settings are optional; also returns result (see below)</code></pre>
-<p>See <code>test/uniator.js</code> for usage examples.</p>
+<h3>Example</h3>
+<h4>Source files</h4>
+<h5><code>index.html</code></h5>
+<pre><code class="lang-html">&lt;html&gt;
+&lt;head&gt;
+    &lt;title&gt;Title&lt;/title&gt;
+    &lt;meta http-equiv=&quot;Content-Type&quot; content=&quot;text/html; charset=utf-8&quot;&gt;
+
+    &lt;link rel=&quot;stylesheet&quot; href=&quot;style/a.css&quot; type=&quot;text/css&quot;&gt;
+    &lt;link rel=&quot;stylesheet&quot; href=&quot;style/b.css&quot;&gt;
+    &lt;style&gt;
+        h3 {
+            color: #ff0;
+        }
+    &lt;/style&gt;
+    &lt;link rel=&quot;stylesheet&quot; type=&quot;text/css&quot; href=&quot;style/subdir/c.css&quot;&gt;
+    &lt;style&gt;
+        div {
+            font-size: 14px;
+        }
+    &lt;/style&gt;
+
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;link rel=&quot;stylesheet&quot; type=&quot;text/css&quot; href=&quot;style/extra/unknown.css&quot;&gt;
+    &lt;h3&gt;This is header&lt;/h3&gt;
+    &lt;link rel=&quot;stylesheet&quot; type=&quot;text/css&quot; href=&quot;style/subdir/empty.css&quot;&gt;
+    &lt;div&gt;
+        This is content.
+    &lt;/div&gt;
+    &lt;link href=&quot;style/d.css&quot; rel=&quot;stylesheet&quot;&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+<h5><code>style/a.css</code></h5>
+<pre><code class="lang-css">.a {
+    position: relative;
+}</code></pre>
+<h5><code>style/b.css</code></h5>
+<pre><code class="lang-css">/* This is b.css */
+
+.b {
+    color: #0000ff;
+}
+
+.b__mod {
+    font-size: 20px;
+}</code></pre>
+<h5><code>style/subdir/c.css</code></h5>
+<pre><code class="lang-css">.c {
+    width: 50%;
+}</code></pre>
+<h5><code>style/d.css</code></h5>
+<pre><code class="lang-css">.delta {
+    animation-name: delta;
+}</code></pre>
+<h4>JavaScript-code</h4>
+<pre><code class="lang-js">uniator.collectCssInFile(&quot;index.html&quot;, {cssFile: &quot;css/combined&quot;, minifyCss: true});</code></pre>
+<h4>Output files</h4>
+<h5><code>index.html</code></h5>
+<pre><code class="lang-html">&lt;html&gt;
+&lt;head&gt;
+    &lt;title&gt;Title&lt;/title&gt;
+    &lt;meta http-equiv=&quot;Content-Type&quot; content=&quot;text/html; charset=utf-8&quot;&gt;
+
+    &lt;link rel=&quot;stylesheet&quot; href=&quot;css/combined.css&quot; type=&quot;text/css&quot;&gt;
+
+
+
+
+
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;link rel=&quot;stylesheet&quot; type=&quot;text/css&quot; href=&quot;style/extra/unknown.css&quot;&gt;
+    &lt;h3&gt;This is header&lt;/h3&gt;
+
+    &lt;div&gt;
+        This is content.
+    &lt;/div&gt;
+
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+<h5><code>css/combined.css</code></h5>
+<pre><code class="lang-css">.a{position:relative}.b{color:#00f}.b__mod{font-size:20px}h3{color:#ff0}.c{width:50%}div{font-size:14px}.delta{animation-name:delta}</code></pre>
+<p>See <code>test/uniator.js</code> for additional examples.</p>
 <h2>API</h2>
 <h3>collectCSS(content: String, [settings: Object]): Object</h3>
 <p>Process the given content and gather all styles together into file(s) or style-tag(s).</p>
@@ -157,8 +241,9 @@ The only exception is that <code>baseDir</code>, <code>destDir</code> and <code>
 <h2>Special Thanks</h2>
 <p>It would be much more difficult to implement uniator without usage of the following great libraries:</p>
 <ul>
-<li><a href="https://github.com/MatthewMueller/cheerio">cheerio</a> - is used for HTML parsing and transformation</li>
-<li><a href="https://github.com/jprichardson/node-fs-extra">fs-extra</a> - is used for file system operations</li>
+<li><a href="https://github.com/MatthewMueller/cheerio">cheerio</a> is used for HTML parsing and transformation</li>
+<li><a href="https://github.com/jprichardson/node-fs-extra">fs-extra</a> is used for file system operations</li>
+<li><a href="https://github.com/GoalSmashers/clean-css">clean-css</a> is used for CSS minifying.</li>
 </ul>
 <h2>Contributing</h2>
 <p>In lieu of a formal styleguide, take care to maintain the existing coding style.
@@ -187,7 +272,7 @@ Lint and test your code using <a href="http://gruntjs.com/">Grunt</a>.</p>
 					
 		<span class="jsdoc-message">
 		Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.2.2</a>
-		on Sun Feb 16 2014 18:36:08 GMT+0400 (MSK) using the <a href="https://github.com/terryweiss/docstrap">DocStrap template</a>.
+		on Wed Feb 19 2014 22:49:24 GMT+0400 (MSK) using the <a href="https://github.com/terryweiss/docstrap">DocStrap template</a>.
 		</span>
 				</footer>
 			</div>

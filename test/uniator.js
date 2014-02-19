@@ -840,7 +840,7 @@ describe("uniator", function() {
             if (! Array.isArray(list)) {
                 list = [].slice.call(arguments);
             }
-            list = ["result"].concat(list);
+            list = ["../expected"].concat(list);
             return path.join.apply(null, list);
         }
         
@@ -865,6 +865,19 @@ describe("uniator", function() {
         
         it("should include collected styles into source HTML-file", function() {
             check("rewrite_include", {include: true});
+        });
+        
+        it("should collect minified styles into one CSS-file and overwrite source HTML-file", function() {
+            var sName = "rewrite_minify",
+                sResultDir = getResultDir(sName),
+                sCssFile = "css/combined";
+            check(sName, {minifyCss: true, cssFile: sCssFile});
+            
+            sCssFile += ".css";
+            expect( fse.existsSync(sCssFile) )
+                .equal(true);
+            expect( getFileContent(sCssFile) )
+                .equal( getFileContent( path.join(sResultDir, "style.css") ) );
         });
         
         it("should collect styles into several CSS-files and overwrite source HTML-file", function() {

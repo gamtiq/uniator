@@ -42,7 +42,7 @@
     "style",
     "link",
     "css",
-    "files"
+    "file"
   ],
   "dependencies": {
     "mixing": "0.0.2",
