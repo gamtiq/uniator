@@ -828,6 +828,276 @@ describe("uniator", function() {
             
             resetTestDir();
         });
+        
+        it("should skip specified CSS-files and include all collected styles", function() {
+            check([
+                    '<html>\n',
+                        '<head>',
+                            sEmptyCssLink,
+                            '<link rel="stylesheet" href="style/d.css">',
+                            '<title>\nSkip CSS-file and include collected styles</title>\n',
+                            sNonExistentLink,
+                            '<style>p {\ntext-align: justify;\n}\n</style>',
+                            '<link type="text/css" rel="stylesheet" href="style/subdir/skip-me.css">',
+                        '</head>\n',
+                        '<body>\n',
+                            '<h3>Some header</h3>',
+                            sNonExistentLink,
+                            '<link type="text/css" rel="stylesheet" href="style/subdir/c.css">',
+                            '<div>Some content\n</div>\n',
+                        '</body>\n',
+                    '</html>'
+                    ],
+                    {include: true, skipCssFile: "skip-me"},
+                    [
+                    '<html>\n',
+                        '<head>',
+                            '<style>\n',
+                                '/*----- style/d.css -----*/\n\n',
+                                getFileContent("style/d.css"),
+                                '\n\n',
+                                '/*----- Style tag #1 -----*/\n\n',
+                                'p {\ntext-align: justify;\n}\n',
+                                '\n\n',
+                            '</style>',
+                            '<title>\nSkip CSS-file and include collected styles</title>\n',
+                            sNonExistentLink,
+                            '<link type="text/css" rel="stylesheet" href="style/subdir/skip-me.css">',
+                        '</head>\n',
+                        '<body>\n',
+                            '<h3>Some header</h3>',
+                            sNonExistentLink,
+                            '<style>\n',
+                                '/*----- style/subdir/c.css -----*/\n\n',
+                                getFileContent("style/subdir/c.css"),
+                                '\n\n',
+                            '</style>',
+                            '<div>Some content\n</div>\n',
+                        '</body>\n',
+                    '</html>'
+                    ]);
+            
+            check([
+                    '<html>\n',
+                        '<head>',
+                            sEmptyCssLink,
+                            '<style>.head {margin: 5px; font-weight: bold;}</style>',
+                            '<title>\nSkip several CSS-files and include collected styles</title>\n',
+                            '<link href="style/a.css" rel="stylesheet" type="text/css">',
+                            sNonExistentLink,
+                            '<link rel="stylesheet" href="style/b.css" type="text/css">',
+                        '</head>\n',
+                        '<body>\n',
+                            sEmptyCssLink,
+                            sNonExistentLink,
+                            '<h3>Some header</h3>',
+                            '<link type="text/css" rel="stylesheet" href="style/subdir/skip-me.css">',
+                            sEmptyCssLink,
+                            '<link type="text/css" rel="stylesheet" href="style/d.css">',
+                            '<div>Some content\n</div>\n',
+                            '<link type="text/css" rel="stylesheet" href="style/subdir/c.css">',
+                            sEmptyCssLink,
+                        '</body>\n',
+                    '</html>'
+                    ],
+                    {include: true, skipCssFile: [sEmptyCssFile, "subdir/skip-me", "b"]},
+                    [
+                    '<html>\n',
+                        '<head>',
+                            sEmptyCssLink,
+                            '<style>\n',
+                                '/*----- Style tag #1 -----*/\n\n',
+                                '.head {margin: 5px; font-weight: bold;}',
+                                '\n\n',
+                                '/*----- style/a.css -----*/\n\n',
+                                getFileContent("style/a.css"),
+                                '\n\n',
+                            '</style>',
+                            '<title>\nSkip several CSS-files and include collected styles</title>\n',
+                            sNonExistentLink,
+                            '<link rel="stylesheet" href="style/b.css" type="text/css">',
+                        '</head>\n',
+                        '<body>\n',
+                            sEmptyCssLink,
+                            sNonExistentLink,
+                            '<h3>Some header</h3>',
+                            '<link type="text/css" rel="stylesheet" href="style/subdir/skip-me.css">',
+                            sEmptyCssLink,
+                            '<style>\n',
+                                '/*----- style/d.css -----*/\n\n',
+                                getFileContent("style/d.css"),
+                                '\n\n',
+                                '/*----- style/subdir/c.css -----*/\n\n',
+                                getFileContent("style/subdir/c.css"),
+                                '\n\n',
+                            '</style>',
+                            '<div>Some content\n</div>\n',
+                            sEmptyCssLink,
+                        '</body>\n',
+                    '</html>'
+                    ]);
+        });
+        
+        it("should skip specified CSS-files and collect styles into several files", function() {
+            var sResultFile;
+            
+            check([
+                    '<html>\n',
+                        '<head>',
+                            '<link rel="stylesheet" href="style/b.css">',
+                            sEmptyCssLink,
+                            '<link rel="stylesheet" href="style/d.css" type="text/css">',
+                            '<title>\nSkip CSS-file and save collected styles into files</title>\n',
+                            sNonExistentLink,
+                            '<style>p {\ntext-align: justify;\n}\n</style>',
+                        '</head>\n',
+                        '<body>\n',
+                            '<h3>Some header</h3>',
+                            '<link type="text/css" rel="stylesheet" href="style/subdir/skipthis.css">',
+                            '<style>\n    h4 {text-align: right;\n}</style>',
+                            '<link type="text/css" rel="stylesheet" href="style/subdir/c.css">',
+                            sEmptyCssLink,
+                            '<link href="style/a.css" rel="stylesheet">',
+                            sNonExistentLink,
+                            '<div>Some content\n</div>\n',
+                        '</body>\n',
+                    '</html>'
+                    ],
+                    {skipCssFile: "skipthis"},
+                    [
+                    '<html>\n',
+                        '<head>',
+                            '<link rel="stylesheet" href="style1.css">',
+                            '<title>\nSkip CSS-file and save collected styles into files</title>\n',
+                            sNonExistentLink,
+                        '</head>\n',
+                        '<body>\n',
+                            '<h3>Some header</h3>',
+                            '<link type="text/css" rel="stylesheet" href="style/subdir/skipthis.css">',
+                            '<link rel="stylesheet" type="text/css" href="style2.css">',
+                            sNonExistentLink,
+                            '<div>Some content\n</div>\n',
+                        '</body>\n',
+                    '</html>'
+                    ]);
+            
+            sResultFile = "style1.css";
+            expect( fse.existsSync(sResultFile) )
+                .equal(true);
+            expect( getFileContent(sResultFile) )
+                .equal([
+                        '/*----- style/b.css -----*/\n\n',
+                        getFileContent("style/b.css"),
+                        '\n\n',
+                        '/*----- style/d.css -----*/\n\n',
+                        getFileContent("style/d.css"),
+                        '\n\n',
+                        '/*----- Style tag #1 -----*/\n\n',
+                        'p {\ntext-align: justify;\n}\n',
+                        '\n\n'
+                        ].join(""));
+            
+            sResultFile = "style2.css";
+            expect( fse.existsSync(sResultFile) )
+                .equal(true);
+            expect( getFileContent(sResultFile) )
+                .equal([
+                        '/*----- Style tag #2 -----*/\n\n',
+                        '\n    h4 {text-align: right;\n}',
+                        '\n\n',
+                        '/*----- style/subdir/c.css -----*/\n\n',
+                        getFileContent("style/subdir/c.css"),
+                        '\n\n',
+                        '/*----- style/a.css -----*/\n\n',
+                        getFileContent("style/a.css"),
+                        '\n\n'
+                        ].join(""));
+            
+            resetTestDir();
+            
+            
+            sResultFile = "path/to/build/combi";
+            check([
+                    '<html>\n',
+                        '<head>',
+                            '<title>\nSkip several CSS-files and save collected styles into files</title>\n',
+                            sEmptyCssLink,
+                            '<link href="style/b.css" rel="stylesheet" type="text/css">',
+                            '<style>\n\n\n   .head {margin: 5px; font-weight: bold;}\n\n\n</style>',
+                            '<link rel="stylesheet" href="style/a.css" type="text/css">',
+                            sNonExistentLink,
+                        '</head>\n',
+                        '<body>\n',
+                            sNonExistentLink,
+                            sEmptyCssLink,
+                            '<style>.fresh {color: #468c00;}</style>',
+                            '<h3>Some header</h3>',
+                            '<link href="path/to/some-dir/break.css" rel="stylesheet">',
+                            '<link type="text/css" rel="stylesheet" href="style/subdir/c.css">',
+                            '<div>Some content\n</div>\n',
+                            '<link type="text/css" rel="stylesheet" href="style/d.css">',
+                            sEmptyCssLink,
+                        '</body>\n',
+                    '</html>'
+                    ],
+                    {cssFile: sResultFile, skipCssFile: [sEmptyCssFile, "path/to/some-dir/break", "b"]},
+                    [
+                    '<html>\n',
+                        '<head>',
+                            '<title>\nSkip several CSS-files and save collected styles into files</title>\n',
+                            sEmptyCssLink,
+                            '<link href="style/b.css" rel="stylesheet" type="text/css">',
+                            '<link rel="stylesheet" type="text/css" href="', sResultFile, '1.css">',
+                            sNonExistentLink,
+                        '</head>\n',
+                        '<body>\n',
+                            sNonExistentLink,
+                            sEmptyCssLink,
+                            '<link rel="stylesheet" type="text/css" href="', sResultFile, '2.css">',
+                            '<h3>Some header</h3>',
+                            '<link href="path/to/some-dir/break.css" rel="stylesheet">',
+                            '<link type="text/css" rel="stylesheet" href="', sResultFile, '3.css">',
+                            '<div>Some content\n</div>\n',
+                            sEmptyCssLink,
+                        '</body>\n',
+                    '</html>'
+                    ]);
+            
+            expect( fse.existsSync(sResultFile + "1.css") )
+                .equal(true);
+            expect( getFileContent(sResultFile + "1.css") )
+                .equal([
+                        '/*----- Style tag #1 -----*/\n\n',
+                        '\n\n\n   .head {margin: 5px; font-weight: bold;}\n\n\n',
+                        '\n\n',
+                        '/*----- style/a.css -----*/\n\n',
+                        getFileContent("style/a.css"),
+                        '\n\n'
+                        ].join(""));
+            
+            expect( fse.existsSync(sResultFile + "2.css") )
+                .equal(true);
+            expect( getFileContent(sResultFile + "2.css") )
+                .equal([
+                        '/*----- Style tag #2 -----*/\n\n',
+                        '.fresh {color: #468c00;}',
+                        '\n\n'
+                        ].join(""));
+            
+            expect( fse.existsSync(sResultFile + "3.css") )
+                .equal(true);
+            expect( getFileContent(sResultFile + "3.css") )
+                .equal([
+                        '/*----- style/subdir/c.css -----*/\n\n',
+                        getFileContent("style/subdir/c.css"),
+                        '\n\n',
+                        '/*----- style/d.css -----*/\n\n',
+                        getFileContent("style/d.css"),
+                        '\n\n'
+                        ].join(""));
+            
+            resetTestDir();
+        });
     });
     
     

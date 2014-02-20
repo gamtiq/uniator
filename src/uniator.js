@@ -26,6 +26,36 @@ function warningToString() {
     return this.message || "";
 }
 
+
+/**
+ * Check whether given file is in specified list.
+ *
+ * It is supposed that file is in list when:
+ * 
+ * * the file is an item of the list
+ * * or the file has `.css` extension and the file without extension is an item of the list
+ * * or [basename](http://nodejs.org/api/path.html#path_path_basename_p_ext) of the file is an item of the list
+ * * or the file has `.css` extension and its `basename` without extension is an item of the list
+ *
+ * @param {String} file
+ *     Name of file or path to file that should be checked.
+ * @param {Array} fileList
+ *     List of file names or paths that should be examined.
+ * @return {Boolean}
+ *   `true` if given file is in specified list,
+ *   otherwise `false`.
+ */
+function isFileInList(file, fileList) {
+    /*jshint laxbreak:true*/
+    var sExt = path.extname(file);
+    return fileList.length > 0
+            && (fileList.indexOf(file) > -1
+                || (sExt === ".css" && fileList.indexOf(file.substring(0, file.length - 4)) > -1)
+                || fileList.indexOf(path.basename(file)) > -1
+                || (sExt === ".css" && fileList.indexOf(path.basename(file, ".css")) > -1));
+}
+
+
 /**
  * Process the given content and gather all styles together into file(s) or style-tag(s).
  *
@@ -56,6 +86,8 @@ function warningToString() {
  *   * `removeEmptyRef`: `Boolean` - whether link-tags pointing to empty CSS-files should be removed; `true` by default
  *   * `removeEmptyStyle`: `Boolean` - whether empty style-tags should be removed; `true` by default
  *   * `removeSourceFile`: `Boolean` - whether collected source CSS-files should be removed; `false` by default
+ *   * `skipCssFile`: `Array` | `String` - a CSS-file or list of CSS-files that should not be collected;
+ *        each file can be specified by name or by path; if file has `.css` extension the extension can be omitted
  *   * `sourceDir`: `String` - path to directory relative to which files should be searched; 
  *        current working directory by default
  *   * `warnNotFound`: `Boolean` - whether to include warning about CSS-file that is not found; `true` by default
@@ -66,6 +98,7 @@ function warningToString() {
  *   * `result`: `String` - the processed content
  *   * `warning`: `Array` | `null` - list of warnings that were found during processing;
  *       each warning is an object that contains `message` field and maybe another fields representing warning details
+ * @alias module:uniator.collectCSS
  */
 function collectCSS(content, settings) {
     /*jshint expr:true, laxbreak:true, quotmark:false*/
@@ -92,6 +125,7 @@ function collectCSS(content, settings) {
         sDestDir = settings.destDir || settings.baseDir || "./",
         sSourceDir = settings.sourceDir || settings.baseDir,
         cssMinifier = settings.minifyCss,
+        skipFileList = settings.skipCssFile,
         
         // Parse content and search for styles
         doc = cheerio.load(content, {lowerCaseTags: true, lowerCaseAttributeNames: true}),
@@ -117,6 +151,9 @@ function collectCSS(content, settings) {
         if (cssMinifier) {
             cssMinifier = new CleanCss(typeof cssMinifier === "object" ? cssMinifier : {});
         }
+        if (skipFileList && typeof skipFileList === "string") {
+            skipFileList = [skipFileList];
+        }
         
         // Iterate over found tags and form groups of tags that should be processed
         nK = 0;
@@ -126,63 +163,71 @@ function collectCSS(content, settings) {
                 bStyle = sName === "style",
                 tagAttr = tag.attribs,
                 elem = doc(tag), 
-                bExists, bNonEmpty, sContent, sFile, tagGroup;
+                bNonEmpty, bSkip, sContent, sFile, tagGroup;
             if (! tagAttr.type || tagAttr.type === "text/css") {
             
                 if ((bLink && tagAttr.rel === "stylesheet" && tagAttr.href
-                            && (sFile = path.resolve(sSourceDir, tagAttr.href)) && (bExists = fse.existsSync(sFile))) 
+                            && (sFile = path.resolve(sSourceDir, tagAttr.href)) 
+                            && ! ( bSkip = (skipFileList && isFileInList(tagAttr.href, skipFileList)) )) 
                         || bStyle) {
                     
-                    sContent = bLink
-                                ? fse.readFileSync(sFile, {encoding: sEncoding})
-                                : elem.contents().toString();
-                    bNonEmpty = sContent && checkStyleRegExp.test(sContent);
-                    if (bLink || bCollectStyle) {
-                        if (! bNonEmpty && ((bLink && bRemoveEmptyRef) || (bStyle && bRemoveEmptyStyle))) {
-                            elem.remove();
-                            bContentModified = true;
-                            if (bLink && bRemoveSourceFile) {
-                                fse.unlinkSync(sFile);
-                            }
-                        }
-                        // Non-empty or non-removed css-file/style-tag
-                        else {
-                            if (bNewTagGroup) {
-                                tagGroupList.push(tagGroup = []);
-                                bNewTagGroup = false;
-                            }
-                            else {
-                                tagGroup = tagGroupList[tagGroupList.length - 1];
-                            }
-                            tagGroup.push({
-                                name: sName,
-                                elem: elem,
-                                content: sContent,
-                                nonEmpty: bNonEmpty,
-                                file: bLink ? sFile : null,
-                                ref: bLink ? tagAttr.href : ++nK
+                    // Link that points to non-existent file
+                    if (bLink && ! fse.existsSync(sFile)) {
+                        bWarnNotFound &&
+                            addWarning({
+                                message: ["'", tagAttr.href, "' is not found"].join(""),
+                                ref: tagAttr.href,
+                                file: sFile,
+                                tag: doc.html(elem)
                             });
-                        }
                     }
-                    // Style-tag that should not be collected
-                    else if (bStyle) {
-                        if (bNonEmpty) {
-                            bNewTagGroup = true;
+                    else {
+                        sContent = bLink
+                                    ? fse.readFileSync(sFile, {encoding: sEncoding})
+                                    : elem.contents().toString();
+                        bNonEmpty = sContent && checkStyleRegExp.test(sContent);
+                        if (bLink || bCollectStyle) {
+                            if (! bNonEmpty && ((bLink && bRemoveEmptyRef) || (bStyle && bRemoveEmptyStyle))) {
+                                elem.remove();
+                                bContentModified = true;
+                                if (bLink && bRemoveSourceFile) {
+                                    fse.unlinkSync(sFile);
+                                }
+                            }
+                            // Non-empty or non-removed css-file/style-tag
+                            else {
+                                if (bNewTagGroup) {
+                                    tagGroupList.push(tagGroup = []);
+                                    bNewTagGroup = false;
+                                }
+                                else {
+                                    tagGroup = tagGroupList[tagGroupList.length - 1];
+                                }
+                                tagGroup.push({
+                                    name: sName,
+                                    elem: elem,
+                                    content: sContent,
+                                    nonEmpty: bNonEmpty,
+                                    file: bLink ? sFile : null,
+                                    ref: bLink ? tagAttr.href : ++nK
+                                });
+                            }
                         }
-                        else if (bRemoveEmptyStyle) {
-                            elem.remove();
-                            bContentModified = true;
+                        // Style-tag that should not be collected
+                        else if (bStyle) {
+                            if (bNonEmpty) {
+                                bNewTagGroup = true;
+                            }
+                            else if (bRemoveEmptyStyle) {
+                                elem.remove();
+                                bContentModified = true;
+                            }
                         }
                     }
                 }
-                // Link that points to non-existent file
-                else if (sFile && ! bExists && bWarnNotFound) {
-                    addWarning({
-                        message: ["'", tagAttr.href, "' is not found"].join(""),
-                        ref: tagAttr.href,
-                        file: sFile,
-                        tag: doc.html(elem)
-                    });
+                // Link that points to a file that should not be collected
+                else if (sFile && bSkip) {
+                    bNewTagGroup = true;
                 }
             
             }
@@ -270,6 +315,7 @@ function collectCSS(content, settings) {
  *   The result object. Contains the same fields as the result of {@link collectCSS} plus the following fields:
  *   
  *   * `file`: `String` - absolute path to file that contains operation result.
+ * @alias module:uniator.collectCssInFile
  */
 function collectCssInFile(file, settings) {
     /*jshint expr:true*/

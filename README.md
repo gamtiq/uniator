@@ -171,6 +171,8 @@ Process the given content and gather all styles together into file(s) or style-t
     * `removeEmptyRef`: `Boolean` - whether link-tags pointing to empty CSS-files should be removed; `true` by default
     * `removeEmptyStyle`: `Boolean` - whether empty style-tags should be removed; `true` by default
     * `removeSourceFile`: `Boolean` - whether collected source CSS-files should be removed; `false` by default
+    * `skipCssFile`: `Array` | `String` - a CSS-file or list of CSS-files that should not be collected;
+        each file can be specified by name or by path; if file has `.css` extension the extension can be omitted
     * `sourceDir`: `String` - path to directory relative to which files should be searched; 
         current working directory by default
     * `warnNotFound`: `Boolean` - whether to include warning about CSS-file that is not found; `true` by default
@@ -205,8 +207,8 @@ Process the given file and gather all styles together into file(s) or style-tag(
 
 It would be much more difficult to implement uniator without usage of the following great libraries:
 
-* [cheerio](https://github.com/MatthewMueller/cheerio) is used for HTML parsing and transformation
-* [fs-extra](https://github.com/jprichardson/node-fs-extra) is used for file system operations
+* [cheerio](https://github.com/MatthewMueller/cheerio) is used for HTML parsing and transformation.
+* [fs-extra](https://github.com/jprichardson/node-fs-extra) is used for file system operations.
 * [clean-css](https://github.com/GoalSmashers/clean-css) is used for CSS minifying.
 
 ## Contributing

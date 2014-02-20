@@ -123,7 +123,7 @@
         <dl>
             
 <dt>
-    <h4 class="name" id="collectCSS"><span class="type-signature">&lt;inner> </span>collectCSS<span class="signature">(content, <span class="optional">settings</span>)</span><span class="type-signature"> &rarr; {Object}</span></h4>
+    <h4 class="name" id="collectCSS"><span class="type-signature">&lt;static> </span>collectCSS<span class="signature">(content, <span class="optional">settings</span>)</span><span class="type-signature"> &rarr; {Object}</span></h4>
     
     
 </dt>
@@ -250,6 +250,8 @@
 <li><code>removeEmptyRef</code>: <code>Boolean</code> - whether link-tags pointing to empty CSS-files should be removed; <code>true</code> by default</li>
 <li><code>removeEmptyStyle</code>: <code>Boolean</code> - whether empty style-tags should be removed; <code>true</code> by default</li>
 <li><code>removeSourceFile</code>: <code>Boolean</code> - whether collected source CSS-files should be removed; <code>false</code> by default</li>
+<li><code>skipCssFile</code>: <code>Array</code> | <code>String</code> - a CSS-file or list of CSS-files that should not be collected;
+   each file can be specified by name or by path; if file has <code>.css</code> extension the extension can be omitted</li>
 <li><code>sourceDir</code>: <code>String</code> - path to directory relative to which files should be searched; 
    current working directory by default</li>
 <li><code>warnNotFound</code>: <code>Boolean</code> - whether to include warning about CSS-file that is not found; <code>true</code> by default</li>
@@ -285,7 +287,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="uniator.js.html">uniator.js</a>, <a href="uniator.js.html#sunlight-1-line-70">line 70</a>
+        <a href="uniator.js.html">uniator.js</a>, <a href="uniator.js.html#sunlight-1-line-103">line 103</a>
     </li></ul></dd>
     
 
@@ -342,7 +344,7 @@
         
             
 <dt>
-    <h4 class="name" id="collectCssInFile"><span class="type-signature">&lt;inner> </span>collectCssInFile<span class="signature">(file, <span class="optional">settings</span>)</span><span class="type-signature"> &rarr; {Object}</span></h4>
+    <h4 class="name" id="collectCssInFile"><span class="type-signature">&lt;static> </span>collectCssInFile<span class="signature">(file, <span class="optional">settings</span>)</span><span class="type-signature"> &rarr; {Object}</span></h4>
     
     
 </dt>
@@ -482,7 +484,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="uniator.js.html">uniator.js</a>, <a href="uniator.js.html#sunlight-1-line-274">line 274</a>
+        <a href="uniator.js.html">uniator.js</a>, <a href="uniator.js.html#sunlight-1-line-320">line 320</a>
     </li></ul></dd>
     
 
@@ -533,6 +535,178 @@
     
 </dd>
 
+        
+            
+<dt>
+    <h4 class="name" id="isFileInList"><span class="type-signature">&lt;inner> </span>isFileInList<span class="signature">(file, fileList)</span><span class="type-signature"> &rarr; {Boolean}</span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>Check whether given file is in specified list.</p>
+<p>It is supposed that file is in list when:</p>
+<ul>
+<li>the file is an item of the list</li>
+<li>or the file has <code>.css</code> extension and the file without extension is an item of the list</li>
+<li>or <a href="http://nodejs.org/api/path.html#path_path_basename_p_ext">basename</a> of the file is an item of the list</li>
+<li>or the file has <code>.css</code> extension and its <code>basename</code> without extension is an item of the list</li>
+</ul>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+
+		<th>Type</th>
+
+		
+
+		
+
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+
+	<tbody>
+	
+
+        <tr>
+            
+                <td class="name"><code>file</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">String</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Name of file or path to file that should be checked.</p></td>
+        </tr>
+
+	
+
+        <tr>
+            
+                <td class="name"><code>fileList</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Array</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>List of file names or paths that should be examined.</p></td>
+        </tr>
+
+	
+	</tbody>
+</table>
+
+    
+    
+    
+<dl class="details">
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="uniator.js.html">uniator.js</a>, <a href="uniator.js.html#sunlight-1-line-48">line 48</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    <h5>Returns:</h5>
+    
+            
+<div class="param-desc">
+    <p><code>true</code> if given file is in specified list,
+  otherwise <code>false</code>.</p>
+</div>
+
+
+
+<dl>
+	<dt>
+		Type
+	</dt>
+	<dd>
+		
+<span class="param-type">Boolean</span>
+
+
+	</dd>
+</dl>
+
+
+        
+    
+    
+</dd>
+
         </dl>
     
 
@@ -559,7 +733,7 @@
 					
 		<span class="jsdoc-message">
 		Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.2.2</a>
-		on Wed Feb 19 2014 22:49:24 GMT+0400 (MSK) using the <a href="https://github.com/terryweiss/docstrap">DocStrap template</a>.
+		on Thu Feb 20 2014 22:40:10 GMT+0400 (MSK) using the <a href="https://github.com/terryweiss/docstrap">DocStrap template</a>.
 		</span>
 				</footer>
 			</div>
