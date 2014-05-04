@@ -1,0 +1,9 @@
+body {
+    background: white url(asset/image/bg/main.png);
+    cursor: url("/image/cursor/main.cur");
+}
+
+h3 {
+    background: white url('../image/back/header.png');
+    cursor: url("../image/cursor/header.cur");
+}

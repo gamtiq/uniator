@@ -175,6 +175,11 @@ Process the given content and gather all styles together into file(s) or style-t
         each file can be specified by name or by path; if file has `.css` extension the extension can be omitted
     * `sourceDir`: `String` - path to directory relative to which files should be searched; 
         current working directory by default
+    * `updateUrl`: `Boolean` | `Function` - whether URLs found in CSS-files should be updated to be accessible from destination file;
+        `false` by default; a function can be used as the setting value; in the latter case the function will be called
+        instead of predefined function to get new URL; if the function returns a string value, that value will be used as new URL;
+        a non-string value returned by the function will be ignored (i.e. the source URL will not be changed);
+        data object will be passed into the function (see [getUpdatedUrl](#getUpdatedUrl) to consult object' structure)
     * `warnNotFound`: `Boolean` - whether to include warning about CSS-file that is not found; `true` by default
 
 **Returns** the result object that contains the following fields:
@@ -203,12 +208,28 @@ Process the given file and gather all styles together into file(s) or style-tag(
 
 * `file`: `String` - absolute path to file that contains operation result.
 
+### <a name="getUpdatedUrl"></a>getUpdatedUrl(data: Object): String
+
+Determine new value of relative URL.
+
+**Parameters:**
+
+* `data: Object` - Represents data about URL and environment.
+    Contains the following fields:
+    
+    * `destDir`: `String` - path to directory of destination CSS-file
+    * `sourceDir`: `String` - path to directory of source CSS-file
+    * `url`: `String` - source URL
+
+**Returns** string that represents the new URL, or source URL when URL is not relative.
+
 ## Special Thanks
 
 It would be much more difficult to implement uniator without usage of the following great libraries:
 
 * [cheerio](https://github.com/MatthewMueller/cheerio) is used for HTML parsing and transformation.
 * [fs-extra](https://github.com/jprichardson/node-fs-extra) is used for file system operations.
+* [rework](https://github.com/reworkcss/rework) is used for CSS processing.
 * [clean-css](https://github.com/GoalSmashers/clean-css) is used for CSS minifying.
 
 ## Contributing

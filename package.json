@@ -49,6 +49,7 @@
     "mixing": "0.0.2",
     "fs-extra": "~0.8.1",
     "clean-css": "~2.1.0",
-    "cheerio": "~0.13.1"
+    "cheerio": "~0.13.1",
+    "rework": "~0.20.2"
   }
 }

@@ -18,7 +18,8 @@ var fse = require("fs-extra"),
     path = require("path"),
     cheerio = require("cheerio"),
     CleanCss = require("clean-css"),
-    mixing = require("mixing");
+    mixing = require("mixing"),
+    rework = require("rework");
 
 
 function warningToString() {
@@ -26,6 +27,10 @@ function warningToString() {
     return this.message || "";
 }
 
+
+function normalizePath(p) {
+    return p.split(path.sep).join("/");
+}
 
 /**
  * Check whether given file is in specified list.
@@ -53,6 +58,29 @@ function isFileInList(file, fileList) {
                 || (sExt === ".css" && fileList.indexOf(file.substring(0, file.length - 4)) > -1)
                 || fileList.indexOf(path.basename(file)) > -1
                 || (sExt === ".css" && fileList.indexOf(path.basename(file, ".css")) > -1));
+}
+
+
+/**
+ * Determine new value of relative URL.
+ *
+ * @param {Object} data
+ *     Represents data about URL and environment.
+ *     Contains the following fields:
+ *     
+ *   * `destDir`: `String` - path to directory of destination CSS-file
+ *   * `sourceDir`: `String` - path to directory of source CSS-file
+ *   * `url`: `String` - source URL
+ * @return {String}
+ *   String that represents the new URL, or source URL when URL is not relative.
+ * @alias module:uniator.getUpdatedUrl
+ */
+function getUpdatedUrl(data) {
+    var sUrl = data.url;
+    if (sUrl.charAt(0) !== "/" && ! /^[^:\/\?#]+:/.test(sUrl)) {
+        return normalizePath( path.relative(data.destDir, path.resolve(data.sourceDir, sUrl)) );
+    }
+    return sUrl;
 }
 
 
@@ -90,6 +118,11 @@ function isFileInList(file, fileList) {
  *        each file can be specified by name or by path; if file has `.css` extension the extension can be omitted
  *   * `sourceDir`: `String` - path to directory relative to which files should be searched; 
  *        current working directory by default
+ *   * `updateUrl`: `Boolean` | `Function` - whether URLs found in CSS-files should be updated to be accessible from destination file;
+ *        `false` by default; a function can be used as the setting value; in the latter case the function will be called
+ *        instead of predefined function to get new URL; if the function returns a string value, that value will be used as new URL;
+ *        a non-string value returned by the function will be ignored (i.e. the source URL will not be changed);
+ *        data object will be passed into the function (see {@link module:uniator.getUpdatedUrl getUpdatedUrl} to consult object' structure)
  *   * `warnNotFound`: `Boolean` - whether to include warning about CSS-file that is not found; `true` by default
  * @return {Object}
  *     The result object that contains the following fields:
@@ -98,6 +131,7 @@ function isFileInList(file, fileList) {
  *   * `result`: `String` - the processed content
  *   * `warning`: `Array` | `null` - list of warnings that were found during processing;
  *       each warning is an object that contains `message` field and maybe another fields representing warning details
+ * @see {@link module:uniator.getUpdatedUrl getUpdatedUrl}
  * @alias module:uniator.collectCSS
  */
 function collectCSS(content, settings) {
@@ -126,6 +160,7 @@ function collectCSS(content, settings) {
         sSourceDir = settings.sourceDir || settings.baseDir,
         cssMinifier = settings.minifyCss,
         skipFileList = settings.skipCssFile,
+        updateUrl = settings.updateUrl,
         
         // Parse content and search for styles
         doc = cheerio.load(content, {lowerCaseTags: true, lowerCaseAttributeNames: true}),
@@ -153,6 +188,9 @@ function collectCSS(content, settings) {
         }
         if (skipFileList && typeof skipFileList === "string") {
             skipFileList = [skipFileList];
+        }
+        if (updateUrl && typeof updateUrl !== "function") {
+            updateUrl = getUpdatedUrl;
         }
         
         // Iterate over found tags and form groups of tags that should be processed
@@ -196,6 +234,22 @@ function collectCSS(content, settings) {
                             }
                             // Non-empty or non-removed css-file/style-tag
                             else {
+                                if (updateUrl) {
+                                    sContent = rework(sContent)
+                                                    .use(rework.url(function(sUrl) {
+                                                        var sNewUrl = updateUrl({
+                                                                                    url: sUrl,
+                                                                                    sourceDir: path.dirname(sFile),
+                                                                                    destDir: bInclude
+                                                                                                ? sDestDir
+                                                                                                : path.dirname( path.join(sDestDir, sCssFile + ".css") )
+                                                                                });
+                                                        return typeof sNewUrl === "string"
+                                                                    ? sNewUrl
+                                                                    : sUrl;
+                                                    }))
+                                                    .toString();
+                                }
                                 if (bNewTagGroup) {
                                     tagGroupList.push(tagGroup = []);
                                     bNewTagGroup = false;
@@ -268,7 +322,7 @@ function collectCSS(content, settings) {
                 }
                 else {
                     sFile = path.join(sDestDir, sCssFile + (nL > 1 ? nI + 1 : "") + ".css");
-                    sPath = path.relative(sDestDir, sFile).split(path.sep).join("/");
+                    sPath = normalizePath( path.relative(sDestDir, sFile) );
                     if (tag.file) {
                         elem.attr("href", sPath);
                     }
@@ -363,3 +417,4 @@ function collectCssInFile(file, settings) {
 
 exports.collectCSS = collectCSS;
 exports.collectCssInFile = collectCssInFile;
+exports.getUpdatedUrl = getUpdatedUrl;

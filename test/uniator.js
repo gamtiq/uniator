@@ -13,7 +13,7 @@ describe("uniator", function() {
         uniator = require("../src/uniator"),
         
         cssMinifier = new CleanCss(),
-        sTestDir = "./testdir",
+        sTestDir = "testdir",
         sEmptyCssFile = 'style/subdir/empty.css',
         sEmptyCssLink = '<link rel="stylesheet" type="text/css" href="' + sEmptyCssFile + '">',
         sNonExistentFile = 'non-existent-file',
@@ -26,6 +26,14 @@ describe("uniator", function() {
     
     function getFileContent(filePath) {
         return normalizeLineEnd( fse.readFileSync(filePath, {encoding: 'utf8'}).toString() );
+    }
+    
+    function getResultDir(list) {
+        if (! Array.isArray(list)) {
+            list = [].slice.call(arguments);
+        }
+        list = ["../expected"].concat(list);
+        return path.join.apply(null, list);
     }
     
     function resetTestDir() {
@@ -1098,6 +1106,51 @@ describe("uniator", function() {
             
             resetTestDir();
         });
+        
+        it("should update URLs", function() {
+            function check(sourceFile, settings, resultFile) {
+                sourceFile += ".html";
+                if (typeof settings === "string") {
+                    resultFile = settings;
+                    settings = null;
+                }
+                if (resultFile) {
+                    resultFile += ".html";
+                }
+                else {
+                    resultFile = sourceFile;
+                }
+                
+                resultFile = getResultDir(path.basename(resultFile, ".html"), resultFile);
+                var result = collectCSS(getFileContent(sourceFile), settings);
+                expect( result.result )
+                    .equal( getFileContent(resultFile) );
+            }
+            
+            var sCssFile, sName;
+            
+            check("update_url_include",
+                    {include: true, updateUrl: true});
+            
+            sName = "update_url_link";
+            sCssFile = "static/css/main/all";
+            check(sName, {cssFile: sCssFile, updateUrl: true});
+            sCssFile += ".css";
+            expect( fse.existsSync(sCssFile) )
+                .equal(true);
+            expect( getFileContent(sCssFile) )
+                .equal( getFileContent( path.join(getResultDir(sName), "all.css") ) );
+                
+            check("update_url_function_include",
+                    {
+                        include: true,
+                        destDir: "static/assets/html",
+                        updateUrl: function(data) {
+                            return uniator.getUpdatedUrl(data).replace("assets", "kassets")
+                                                                .replace("image", "img");
+                        }
+                    });
+        });
     });
     
     
@@ -1105,14 +1158,6 @@ describe("uniator", function() {
         beforeEach(resetTestDir);
         
         var collectCssInFile = uniator.collectCssInFile;
-        
-        function getResultDir(list) {
-            if (! Array.isArray(list)) {
-                list = [].slice.call(arguments);
-            }
-            list = ["../expected"].concat(list);
-            return path.join.apply(null, list);
-        }
         
         function check(sourceFile, settings, resultFile) {
             sourceFile += ".html";
@@ -1174,6 +1219,51 @@ describe("uniator", function() {
                 .equal(true);
             expect( getFileContent("out/style.css") )
                 .equal( getFileContent( path.join(sResultDir, "style.css") ) );
+        });
+    });
+    
+    
+    describe(".getUpdatedUrl({url: '...', sourceDir: '...', destDir: '...'})", function() {
+        var getUpdatedUrl = uniator.getUpdatedUrl;
+        
+        it("should return source URL", function() {
+            function check(sUrl) {
+                expect( getUpdatedUrl({url: sUrl}) )
+                    .equal(sUrl);
+            }
+            
+            check("/");
+            check("/a/b/c");
+            check("//");
+            check("http:");
+            check("ftp://");
+            check("https://some.server.com/path/to/resource/main");
+            check("c:/");
+        });
+        
+        it("should return updated URL", function() {
+            before(resetTestDir);
+            
+            var sCurrentDirName = path.basename(process.cwd());
+            
+            expect( getUpdatedUrl({sourceDir: "", url: "path/file", destDir: ""}) )
+                .equal("path/file");
+            expect( getUpdatedUrl({sourceDir: "", url: "a", destDir: "../static/assets/html"}) )
+                .equal("../../../" + sCurrentDirName + "/a");
+            expect( getUpdatedUrl({sourceDir: "path/to/some/dir", url: "where/to/go", destDir: ""}) )
+                .equal("path/to/some/dir/where/to/go");
+            expect( getUpdatedUrl({sourceDir: "../../static/files", url: "./a/b/css/style.css", destDir: "static/assets/html"}) )
+                .equal("../../../../../static/files/a/b/css/style.css");
+            expect( getUpdatedUrl({sourceDir: "../../static/files", url: "assets/style/main.css", destDir: "html"}) )
+                .equal("../../../static/files/assets/style/main.css");
+            expect( getUpdatedUrl({sourceDir: "../../static/files", url: "../some/path/to/style.css", destDir: "../html"}) )
+                .equal("../../static/some/path/to/style.css");
+            expect( getUpdatedUrl({sourceDir: "assets/css", url: "../image/main/bg.png", destDir: "build/html"}) )
+                .equal("../../assets/image/main/bg.png");
+            expect( getUpdatedUrl({sourceDir: "assets/css", url: "../image/main/bg.png", destDir: "assets/html"}) )
+                .equal("../image/main/bg.png");
+            expect( getUpdatedUrl({sourceDir: "./assets/css", url: "../../image/main/bg.png", destDir: "assets/html/core"}) )
+                .equal("../../../image/main/bg.png");
         });
     });
 

@@ -1,0 +1,30 @@
+<html>
+<head>
+    <title>test: rewrite, include, update URLs using specified function</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+
+    <style>
+        h3 {
+            color: #ff0;
+            background-image: url("../global-assets/image/h3-back.jpeg");
+        }
+    </style>
+    <link rel="stylesheet" type="text/css" href="style/url1.css">
+    <style>
+        h4 {
+            font-size: 24px;
+            cursor: url('./static/assets/cursor/dont-use-me.svg');
+        }
+    </style>
+    <link rel="stylesheet" type="text/css" href="style/b.css">
+    
+</head>
+<body>
+    <h3>This is a header</h3>
+    <link rel="stylesheet" href="style/subdir/c.css">
+    <div class="content">
+        This is some content.
+    </div>
+    <link rel="stylesheet" type="text/css" href="style/subdir/url2.css">
+</body>
+</html>

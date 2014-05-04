@@ -1,0 +1,61 @@
+<html>
+<head>
+    <title>test: rewrite, include, update URLs</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+
+    <style>
+/*----- style/a.css -----*/
+
+.a {
+  position: relative;
+}
+
+/*----- Style tag #1 -----*/
+
+h3 {
+  color: #ff0;
+  background-image: url("image/back/header.png");
+}
+
+/*----- style/subdir/url2.css -----*/
+
+p {
+  background: url("http://assets.server.com/image/back/text.png");
+  cursor: url("/asset/cursor/usual.svg"), url("asset/cursor/usual.svg"), default;
+}
+
+/*----- style/url1.css -----*/
+
+body {
+  background: white url("style/asset/image/bg/main.png");
+  cursor: url("/image/cursor/main.cur");
+}
+
+h3 {
+  background: white url("image/back/header.png");
+  cursor: url("image/cursor/header.cur");
+}
+
+/*----- style/b.css -----*/
+
+/* This is b.css */
+
+.b {
+  color: #0000ff;
+}
+
+.b__mod {
+  font-size: 20px;
+}
+
+</style>
+    
+    
+    
+</head>
+<body>
+    <h3>This is a header</h3>
+    
+    
+</body>
+</html>

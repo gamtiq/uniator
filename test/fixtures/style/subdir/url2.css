@@ -1,0 +1,4 @@
+p {
+    background: url("http://assets.server.com/image/back/text.png");
+    cursor: url(/asset/cursor/usual.svg), url("../../asset/cursor/usual.svg"), default;
+}

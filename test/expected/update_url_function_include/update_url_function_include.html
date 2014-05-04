@@ -1,0 +1,72 @@
+<html>
+<head>
+    <title>test: rewrite, include, update URLs using specified function</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+
+    <style>
+/*----- Style tag #1 -----*/
+
+h3 {
+  color: #ff0;
+  background-image: url("../../../../global-kassets/img/h3-back.jpeg");
+}
+
+/*----- style/url1.css -----*/
+
+body {
+  background: white url("../../../style/asset/img/bg/main.png");
+  cursor: url("/img/cursor/main.cur");
+}
+
+h3 {
+  background: white url("../../../img/back/header.png");
+  cursor: url("../../../img/cursor/header.cur");
+}
+
+/*----- Style tag #2 -----*/
+
+h4 {
+  font-size: 24px;
+  cursor: url("../cursor/dont-use-me.svg");
+}
+
+/*----- style/b.css -----*/
+
+/* This is b.css */
+
+.b {
+  color: #0000ff;
+}
+
+.b__mod {
+  font-size: 20px;
+}
+
+/*----- style/subdir/c.css -----*/
+
+.c {
+  width: 50%;
+}
+
+/*----- style/subdir/url2.css -----*/
+
+p {
+  background: url("http://kassets.server.com/img/back/text.png");
+  cursor: url("/asset/cursor/usual.svg"), url("../../../asset/cursor/usual.svg"), default;
+}
+
+</style>
+    
+    
+    
+    
+</head>
+<body>
+    <h3>This is a header</h3>
+    
+    <div class="content">
+        This is some content.
+    </div>
+    
+</body>
+</html>

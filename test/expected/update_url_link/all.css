@@ -1,0 +1,38 @@
+/*----- style/subdir/c.css -----*/
+
+.c {
+  width: 50%;
+}
+
+/*----- style/url1.css -----*/
+
+body {
+  background: white url("../../../style/asset/image/bg/main.png");
+  cursor: url("/image/cursor/main.cur");
+}
+
+h3 {
+  background: white url("../../../image/back/header.png");
+  cursor: url("../../../image/cursor/header.cur");
+}
+
+/*----- Style tag #1 -----*/
+
+body {
+  margin: 10px 20px;
+  background-image: url("../../../image/back/ground.png");
+}
+
+/*----- style/subdir/url2.css -----*/
+
+p {
+  background: url("http://assets.server.com/image/back/text.png");
+  cursor: url("/asset/cursor/usual.svg"), url("../../../asset/cursor/usual.svg"), default;
+}
+
+/*----- style/d.css -----*/
+
+.delta {
+  animation-name: delta;
+}
+
